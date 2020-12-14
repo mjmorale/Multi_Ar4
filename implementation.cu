@@ -47,7 +47,7 @@ void array_process(double *input, double *output, int length, int iterations)
 }
 
 __global__
-void gpu_calculation(double* input, double* output, int length, size_t size)
+void gpu_calculation(double* input, double* output, int length)
 {
     unsigned int x = blockIdx.x * blockDim.x + threadIdx.x;
     unsigned int y = blockIdx.y * blockDim.y + threadIdx.y;
@@ -64,21 +64,19 @@ void gpu_calculation(double* input, double* output, int length, size_t size)
     if(x == length / 2 && y == length / 2) {
         return;
     }
-    if(index < size)
-    {
-        if(x > 1 && x < length - 1 && y > 1 && y < length - 1) {
-            output[index] = 0;/*(input[(x-1)*(length)+(y-1)] +
-                         input[(x-1)*(length)+(y)]   +
-                         input[(x-1)*(length)+(y+1)] +
-                         input[(x)*(length)+(y-1)]   +
-                         input[(x)*(length)+(y)]     +
-                         input[(x)*(length)+(y+1)]   +
-                         input[(x+1)*(length)+(y-1)] +
-                         input[(x+1)*(length)+(y)]   +
-                         input[(x+1)*(length)+(y+1)]) / 9;*/
+    
+    if(x > 1 && x < length - 1 && y > 1 && y < length - 1) {
+        output[index] = 0;/*(input[(x-1)*(length)+(y-1)] +
+                        input[(x-1)*(length)+(y)]   +
+                        input[(x-1)*(length)+(y+1)] +
+                        input[(x)*(length)+(y-1)]   +
+                        input[(x)*(length)+(y)]     +
+                        input[(x)*(length)+(y+1)]   +
+                        input[(x+1)*(length)+(y-1)] +
+                        input[(x+1)*(length)+(y)]   +
+                        input[(x+1)*(length)+(y+1)]) / 9;*/
             
         }
-    }
 }
 
 
@@ -118,7 +116,7 @@ void GPU_array_process(double *input, double *output, int length, int iterations
     int nBlks(length/thrsPerBlock + 1);
 
     for(int i = 0; i < iterations-1; i++){
-        gpu_calculation <<< nBlks, thrsPerBlock >>>(gpu_input, gpu_output, length, size);
+        gpu_calculation <<< nBlks, thrsPerBlock >>>(gpu_input, gpu_output, length);
         double * temp = gpu_output;
         gpu_output = gpu_input;
         gpu_input = temp;
