@@ -117,11 +117,12 @@ void GPU_array_process(double *input, double *output, int length, int iterations
 
     for(int i = 0; i < iterations-1; i++){
         gpu_calculation <<< nBlks, thrsPerBlock >>>(gpu_input, gpu_output, length);
+        cudaDeviceSynchronize();
+
         cout<<cudaGetLastError()<<endl;
         double * temp = gpu_output;
         gpu_output = gpu_input;
         gpu_input = temp;
-        cudaDeviceSynchronize();
     }
     gpu_calculation <<< nBlks, thrsPerBlock >>>(gpu_input, gpu_output, length);
 
