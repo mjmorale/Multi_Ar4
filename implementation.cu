@@ -110,6 +110,7 @@ void GPU_array_process(double *input, double *output, int length, int iterations
         double * temp = gpu_input;
         gpu_output = gpu_input;
         gpu_input = temp;
+        cudaDeviceSynchronize();
     }
     gpu_calculation <<< nBlks, thrsPerBlock >>>(gpu_input, gpu_output, length, size);
 
