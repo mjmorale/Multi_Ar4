@@ -99,11 +99,11 @@ void GPU_array_process(double *input, double *output, int length, int iterations
     double* gpu_input;
     double* gpu_output;
     cout<<cudaSuccess<<endl;
-    cout<<cudaMalloc( (void**)&gpu_input, size)<<endl;
-    cout<<cudaMalloc( (void**)&gpu_output, size)<<endl;
+    
     cudaEventRecord(cpy_H2D_start);
     /* Copying array from host to device goes here */
-
+    cout<<cudaMalloc( (void**)&gpu_input, size)<<endl;
+    cout<<cudaMalloc( (void**)&gpu_output, size)<<endl;
     cout<<cudaMemcpy((void*)gpu_input, (void*)input, size, cudaMemcpyHostToDevice)<<endl;
     cout<<cudaMemcpy((void*)gpu_output, (void*)output, size, cudaMemcpyHostToDevice)<<endl;
     cudaDeviceSynchronize();
