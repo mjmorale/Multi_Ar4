@@ -52,7 +52,18 @@ void gpu_calculation(double* input, double* output, int length, size_t size)
     unsigned int x = blockIdx.x * blockDim.x + threadIdx.x;
     unsigned int y = blockIdx.y * blockDim.y + threadIdx.y;
     unsigned int index = y * length + x;
-
+    if(x == length / 2 - 1 && y == length / 2 - 1) {
+        return;
+    }
+    if(x == length / 2 && y == length / 2 - 1) {
+        return;
+    }
+    if(x == length / 2 - 1 && y == length / 2) {
+        return;
+    }
+    if(x == length / 2 && y == length / 2) {
+        return;
+    }
     if(index < size)
     {
         if(x > 1 && x < length - 1 && y > 1 && y < length - 1) {
