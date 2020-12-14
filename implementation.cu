@@ -46,6 +46,33 @@ void array_process(double *input, double *output, int length, int iterations)
     }
 }
 
+__global__
+void gpu_calculation(double* input, double* output, int length)
+{
+    int x = blockIdx.x * blockDim.x + threadIdx.x;
+    int y = blockIdx.y * blockDim.y + threadIdx.y;
+    int index = y * length + x;
+    bool is_middle = (x == length / 2 - 1 && y == length / 2 - 1) || 
+                    (x == length / 2 && y == length / 2 - 1)      ||
+                    (x == length / 2 - 1 && y == length / 2)      ||
+                    (x == length / 2 && y == length / 2);
+    if(!is_middle)
+    {
+        if(x > 1 && x < length - 1 && y > 1 && y < length - 1) {
+            output[index] = (input[(x-1)*(length)+(y-1)] +
+                         input[(x-1)*(length)+(y)]   +
+                         input[(x-1)*(length)+(y+1)] +
+                         input[(x)*(length)+(y-1)]   +
+                         input[(x)*(length)+(y)]     +
+                         input[(x)*(length)+(y+1)]   +
+                         input[(x+1)*(length)+(y-1)] +
+                         input[(x+1)*(length)+(y)]   +
+                         input[(x+1)*(length)+(y+1)]) / 9;
+            
+        }
+    }
+}
+
 
 // GPU Optimized function
 void GPU_array_process(double *input, double *output, int length, int iterations)
@@ -60,20 +87,43 @@ void GPU_array_process(double *input, double *output, int length, int iterations
     cudaEventCreate(&comp_end);
 
     /* Preprocessing goes here */
-
+    double* host_input = input;
+    double* host_output = output;
+    size_t size = length*length*sizeof(double);
+    double* gpu_input;
+    double* gpu_output;
+    cudaMalloc( (void**)&gpu_input, size);
+    cudaMalloc( (void**)&gpu_output, size);
     cudaEventRecord(cpy_H2D_start);
     /* Copying array from host to device goes here */
+    cudaMemcpy((void*)gpu_input, (void*)input, size, cudaMemcpyHostToDevice);
+    cudaMemcpy((void*)gpu_output, (void*)output, size, cudaMemcpyHostToDevice);
+
+
     cudaEventRecord(cpy_H2D_end);
     cudaEventSynchronize(cpy_H2D_end);
 
     //Copy array from host to device
     cudaEventRecord(comp_start);
     /* GPU calculation goes here */
+    int thrsPerBlock = 2048;
+    int nBlks = 16;
+
+    for(int i = 0; i < iterations; i++){
+        gpu_calculation <<< nBlks, thrsPerBlock >>>(gpu_input, gpu_output, length);
+        double * temp = gpu_input;
+        gpu_output = gpu_input;
+        gpu_input = temp;
+    }
+
+
     cudaEventRecord(comp_end);
     cudaEventSynchronize(comp_end);
 
     cudaEventRecord(cpy_D2H_start);
     /* Copying array from device to host goes here */
+    cudaMemcpy((void*)gpu_output, (void*)output, size, cudaMemcpyDeviceToHost);
+
     cudaEventRecord(cpy_D2H_end);
     cudaEventSynchronize(cpy_D2H_end);
 
