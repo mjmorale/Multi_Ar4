@@ -105,12 +105,13 @@ void GPU_array_process(double *input, double *output, int length, int iterations
     int thrsPerBlock = 16;
     int nBlks = length/thrsPerBlock;
 
-    for(int i = 0; i < iterations; i++){
+    for(int i = 0; i < iterations-1; i++){
         gpu_calculation <<< nBlks, thrsPerBlock >>>(gpu_input, gpu_output, length, size);
         double * temp = gpu_input;
         gpu_output = gpu_input;
         gpu_input = temp;
     }
+    gpu_calculation <<< nBlks, thrsPerBlock >>>(gpu_input, gpu_output, length, size);
 
 
     cudaEventRecord(comp_end);
