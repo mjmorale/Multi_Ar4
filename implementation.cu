@@ -101,9 +101,10 @@ void GPU_array_process(double *input, double *output, int length, int iterations
     cout<<cudaMalloc( (void**)&gpu_output, size)<<endl;
     cudaEventRecord(cpy_H2D_start);
     /* Copying array from host to device goes here */
+
     cout<<cudaMemcpy((void*)gpu_input, (void*)input, size, cudaMemcpyHostToDevice)<<endl;
     cout<<cudaMemcpy((void*)gpu_output, (void*)output, size, cudaMemcpyHostToDevice)<<endl;
-
+    cudaDeviceSynchronize();
     
     cudaEventRecord(cpy_H2D_end);
     cudaEventSynchronize(cpy_H2D_end);
@@ -126,6 +127,7 @@ void GPU_array_process(double *input, double *output, int length, int iterations
     }
     gpu_calculation <<< nBlks, thrsPerBlock >>>(gpu_input, gpu_output, length);
 
+    cudaDeviceSynchronize();
 
     cudaEventRecord(comp_end);
     cudaEventSynchronize(comp_end);
@@ -133,6 +135,7 @@ void GPU_array_process(double *input, double *output, int length, int iterations
     cudaEventRecord(cpy_D2H_start);
     /* Copying array from device to host goes here */
     cout<<cudaMemcpy((void*)output, (void*)gpu_output, size, cudaMemcpyDeviceToHost)<<endl;
+    cudaDeviceSynchronize();
 
     cudaEventRecord(cpy_D2H_end);
     cudaEventSynchronize(cpy_D2H_end);
