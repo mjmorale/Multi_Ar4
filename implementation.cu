@@ -138,7 +138,9 @@ void GPU_array_process(double *input, double *output, int length, int iterations
     cudaEventSynchronize(cpy_D2H_end);
 
     /* Postprocessing goes here */
-
+    cudaFree(gpu_input);
+    cudaFree(gpu_output);
+    
     float time;
     cudaEventElapsedTime(&time, cpy_H2D_start, cpy_H2D_end);
     cout<<"Host to Device MemCpy takes "<<setprecision(4)<<time/1000<<"s"<<endl;
