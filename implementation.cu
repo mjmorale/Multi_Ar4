@@ -47,16 +47,13 @@ void array_process(double *input, double *output, int length, int iterations)
 }
 
 __global__
-void gpu_calculation(double* input, double* output, int length)
+void gpu_calculation(double* input, double* output, int length, size_t size)
 {
-    int x = blockIdx.x * blockDim.x + threadIdx.x;
-    int y = blockIdx.y * blockDim.y + threadIdx.y;
-    int index = y * length + x;
-    bool is_middle = (x == length / 2 - 1 && y == length / 2 - 1) || 
-                    (x == length / 2 && y == length / 2 - 1)      ||
-                    (x == length / 2 - 1 && y == length / 2)      ||
-                    (x == length / 2 && y == length / 2);
-    if(!is_middle)
+    unsigned int x = blockIdx.x * blockDim.x + threadIdx.x;
+    unsigned int y = blockIdx.y * blockDim.y + threadIdx.y;
+    unsigned int index = y * length + x;
+
+    if(index < size)
     {
         if(x > 1 && x < length - 1 && y > 1 && y < length - 1) {
             output[index] = (input[(x-1)*(length)+(y-1)] +
@@ -87,13 +84,12 @@ void GPU_array_process(double *input, double *output, int length, int iterations
     cudaEventCreate(&comp_end);
 
     /* Preprocessing goes here */
-    double* host_input = input;
-    double* host_output = output;
     size_t size = length*length*sizeof(double);
     double* gpu_input;
     double* gpu_output;
-    cudaMalloc( (void**)&gpu_input, size);
-    cudaMalloc( (void**)&gpu_output, size);
+    cout<<cudaSuccess<<endl;
+    cout<<cudaMalloc( (void**)&gpu_input, size)<<endl;
+    cout<<cudaMalloc( (void**)&gpu_output, size)<<endl;
     cudaEventRecord(cpy_H2D_start);
     /* Copying array from host to device goes here */
     cudaMemcpy((void*)gpu_input, (void*)input, size, cudaMemcpyHostToDevice);
@@ -106,11 +102,11 @@ void GPU_array_process(double *input, double *output, int length, int iterations
     //Copy array from host to device
     cudaEventRecord(comp_start);
     /* GPU calculation goes here */
-    int thrsPerBlock = 2048;
-    int nBlks = 16;
+    int thrsPerBlock = 16;
+    int nBlks = length/thrsPerBlock;
 
     for(int i = 0; i < iterations; i++){
-        gpu_calculation <<< nBlks, thrsPerBlock >>>(gpu_input, gpu_output, length);
+        gpu_calculation <<< nBlks, thrsPerBlock >>>(gpu_input, gpu_output, length, size);
         double * temp = gpu_input;
         gpu_output = gpu_input;
         gpu_input = temp;
