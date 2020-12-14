@@ -52,7 +52,7 @@ void gpu_calculation(double* input, double* output, int length)
     unsigned int x = blockIdx.x * blockDim.x + threadIdx.x;
     unsigned int y = blockIdx.y * blockDim.y + threadIdx.y;
     unsigned int index = y * length + x;
-    if(x > 1 && x < length - 1 && y > 1 && y < length - 1) {
+    //if(x > 1 && x < length - 1 && y > 1 && y < length - 1) {
         output[index] = 0;/*(input[(x-1)*(length)+(y-1)] +
                         input[(x-1)*(length)+(y)]   +
                         input[(x-1)*(length)+(y+1)] +
@@ -63,8 +63,9 @@ void gpu_calculation(double* input, double* output, int length)
                         input[(x+1)*(length)+(y)]   +
                         input[(x+1)*(length)+(y+1)]) / 9;*/
             
-    }
-    if(x == length / 2 - 1 && y == length / 2 - 1) {
+    //}
+    
+    /*if(x == length / 2 - 1 && y == length / 2 - 1) {
         return;
     }
     if(x == length / 2 && y == length / 2 - 1) {
@@ -75,7 +76,7 @@ void gpu_calculation(double* input, double* output, int length)
     }
     if(x == length / 2 && y == length / 2) {
         return;
-    }
+    }*/
     
    
 }
@@ -116,7 +117,7 @@ void GPU_array_process(double *input, double *output, int length, int iterations
     int thrsPerBlock(64);
     int nBlks(length/64 + 1);
 
-    for(int i = 0; i < iterations-1; i++){
+    /*for(int i = 0; i < iterations-1; i++){
         gpu_calculation <<< 2048, 2048 >>>(gpu_input, gpu_output, length);
         cudaDeviceSynchronize();
 
@@ -124,7 +125,7 @@ void GPU_array_process(double *input, double *output, int length, int iterations
         double * temp = gpu_output;
         gpu_output = gpu_input;
         gpu_input = temp;
-    }
+    }*/
     gpu_calculation <<< 2048, 2048 >>>(gpu_input, gpu_output, length);
 
     cudaDeviceSynchronize();
