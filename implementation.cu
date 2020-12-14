@@ -111,18 +111,19 @@ void GPU_array_process(double *input, double *output, int length, int iterations
     //Copy array from host to device
     cudaEventRecord(comp_start);
     /* GPU calculation goes here */
-    int thrsPerBlock(64);
+    dim3 thrsPerBlock(8,8);
      
-    int nBlks(length/thrsPerBlock + 1);
+    dim3 nBlks(length/64 + 1);
 
     for(int i = 0; i < iterations-1; i++){
         gpu_calculation <<< nBlks, thrsPerBlock >>>(gpu_input, gpu_output, length);
+        cout<<cudaGetLastError()<<endl;
         double * temp = gpu_output;
         gpu_output = gpu_input;
         gpu_input = temp;
         cudaDeviceSynchronize();
     }
-    gpu_calculation <<< nBlks, thrsPerBlock >>>(gpu_input, gpu_output, length, size);
+    gpu_calculation <<< nBlks, thrsPerBlock >>>(gpu_input, gpu_output, length);
 
 
     cudaEventRecord(comp_end);
