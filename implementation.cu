@@ -67,7 +67,8 @@ void gpu_calculation(double* input, double* output, int length, size_t size)
     if(index < size)
     {
         if(x > 1 && x < length - 1 && y > 1 && y < length - 1) {
-            output[index] = (input[(x-1)*(length)+(y-1)] +
+            output[index] = 0;
+            /*(input[(x-1)*(length)+(y-1)] +
                          input[(x-1)*(length)+(y)]   +
                          input[(x-1)*(length)+(y+1)] +
                          input[(x)*(length)+(y-1)]   +
@@ -75,7 +76,7 @@ void gpu_calculation(double* input, double* output, int length, size_t size)
                          input[(x)*(length)+(y+1)]   +
                          input[(x+1)*(length)+(y-1)] +
                          input[(x+1)*(length)+(y)]   +
-                         input[(x+1)*(length)+(y+1)]) / 9;
+                         input[(x+1)*(length)+(y+1)]) / 9;*/
             
         }
     }
